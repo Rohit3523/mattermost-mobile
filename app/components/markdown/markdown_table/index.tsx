@@ -6,7 +6,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState, type ReactElem
 import {type LayoutChangeEvent, Platform, ScrollView, type StyleProp, TouchableOpacity, View, type ViewStyle} from 'react-native';
 
 import CompassIcon from '@components/compass_icon';
-import {CELL_MAX_WIDTH, CELL_MIN_WIDTH} from '@components/markdown/markdown_table_cell';
+import {CELL_FULL_WIDTH, CELL_MAX_WIDTH, CELL_MIN_WIDTH} from '@components/markdown/markdown_table_cell';
 import {Screens} from '@constants';
 import {useTheme} from '@context/theme';
 import {useIsTablet, useWindowDimensions} from '@hooks/device';
@@ -17,6 +17,7 @@ import {changeOpacity, makeStyleSheetFromTheme} from '@utils/theme';
 
 const MAX_HEIGHT = 300;
 const MAX_PREVIEW_COLUMNS = 5;
+const MAX_FULL_COLUMNS = 10;
 
 type MarkdownTableProps = {
     children: ReactNode;
@@ -135,14 +136,18 @@ function MarkdownTable({children, numColumns}: MarkdownTableProps) {
     }, [dimensions.width, dimensions.height, numColumns, isTablet]);
 
     const getTableWidth = useCallback((isFullView = false) => {
-        const columns = Math.min(numColumns, maxPreviewColumns);
+        if (isFullView) {
+            if (isTablet) {
+                // 10 is the padding on the table container
+                return dimensions.width - 10;
+            }
 
-        if (isFullView && isTablet) {
-            // 10 is the padding on the table container
-            return dimensions.width - 10;
+            const fullWidth = numColumns * CELL_FULL_WIDTH;
+            return Math.min(fullWidth, MAX_FULL_COLUMNS * CELL_FULL_WIDTH);
         }
 
-        return (isFullView || columns === 1) ? columns * CELL_MAX_WIDTH : columns * CELL_MIN_WIDTH;
+        const columns = Math.min(numColumns, maxPreviewColumns);
+        return columns === 1 ? columns * CELL_MAX_WIDTH : columns * CELL_MIN_WIDTH;
     }, [numColumns, maxPreviewColumns, isTablet, dimensions.width]);
 
     const getTableStyle = useCallback((isFullView: boolean) => {
@@ -224,7 +229,7 @@ function MarkdownTable({children, numColumns}: MarkdownTableProps) {
         const screen = Screens.TABLE;
         const passProps = {
 
-            // Android expanded tables already scroll horizontally at CELL_MAX_WIDTH.
+            // Expanded tables scroll horizontally at CELL_FULL_WIDTH per column.
             // Only iOS needs renderAsFlex so the full-view container gets a real width.
             renderAsFlex: Platform.OS === 'ios' && shouldRenderAsFlex(true),
             width: getTableWidth(true),

@@ -98,18 +98,43 @@ const Table = ({renderAsFlex, width}: TableScreenProps) => {
         );
     }
 
+    if (renderAsFlex) {
+        return (
+            <SafeAreaView
+                edges={SAFE_AREA_EDGES}
+                style={styles.container}
+                testID='table.screen'
+            >
+                <ScrollView
+                    style={styles.fullHeight}
+                    contentContainerStyle={viewStyle}
+                    testID='table.scroll_view'
+                >
+                    {content}
+                </ScrollView>
+            </SafeAreaView>
+        );
+    }
+
+    // Wide tables mirror Android: outer vertical scroller carries the screen
+    // id, inner horizontal scroller carries the scroll-view id and the
+    // explicit table width so columns keep CELL_FULL_WIDTH instead of squeezing.
     return (
         <SafeAreaView
             edges={SAFE_AREA_EDGES}
             style={styles.container}
-            testID='table.screen'
         >
             <ScrollView
                 style={styles.fullHeight}
-                contentContainerStyle={viewStyle}
-                testID='table.scroll_view'
+                testID='table.screen'
             >
-                {content}
+                <ScrollView
+                    contentContainerStyle={viewStyle}
+                    horizontal={true}
+                    testID='table.scroll_view'
+                >
+                    {content}
+                </ScrollView>
             </ScrollView>
         </SafeAreaView>
     );

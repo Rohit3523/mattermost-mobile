@@ -4,6 +4,7 @@
 import React from 'react';
 import {Platform, StyleSheet, View} from 'react-native';
 
+import {CELL_FULL_WIDTH} from '@components/markdown/markdown_table_cell';
 import {Screens} from '@constants';
 import {navigateToScreen} from '@screens/navigation';
 import CallbackStore from '@store/callback_store';
@@ -98,6 +99,44 @@ describe('MarkdownTable', () => {
         expect(navigateToScreen).toHaveBeenCalledWith(
             Screens.TABLE,
             expect.objectContaining({renderAsFlex: false}),
+        );
+    });
+
+    it('should size a wide full table from all columns, not the preview cap', async () => {
+        const {getByTestId} = renderWithIntlAndTheme(
+            <MarkdownTable numColumns={8}>
+                {tableRows(8)}
+            </MarkdownTable>,
+        );
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        fireEvent.press(getByTestId('markdown_table'));
+
+        expect(navigateToScreen).toHaveBeenCalledWith(
+            Screens.TABLE,
+            expect.objectContaining({renderAsFlex: false, width: 8 * CELL_FULL_WIDTH}),
+        );
+    });
+
+    it('should cap the full table width for pathological column counts', async () => {
+        const {getByTestId} = renderWithIntlAndTheme(
+            <MarkdownTable numColumns={30}>
+                {tableRows(30)}
+            </MarkdownTable>,
+        );
+
+        await act(async () => {
+            await Promise.resolve();
+        });
+
+        fireEvent.press(getByTestId('markdown_table'));
+
+        expect(navigateToScreen).toHaveBeenCalledWith(
+            Screens.TABLE,
+            expect.objectContaining({renderAsFlex: false, width: 10 * CELL_FULL_WIDTH}),
         );
     });
 

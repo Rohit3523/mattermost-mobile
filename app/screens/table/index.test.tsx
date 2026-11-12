@@ -95,4 +95,21 @@ describe('Table screen', () => {
             width: 1536,
         });
     });
+
+    it('should nest a horizontal scroller for wide iOS tables', () => {
+        CallbackStore.setCallback(() => <Text>{'cell'}</Text>);
+
+        const {getByTestId} = renderWithIntlAndTheme(
+            <Table
+                renderAsFlex={false}
+                width={1792}
+            />,
+        );
+
+        expect(getByTestId('table.scroll_view').props.horizontal).toBe(true);
+        expect(StyleSheet.flatten(getByTestId('table.scroll_view').props.contentContainerStyle)).toEqual({
+            width: 1792,
+        });
+        expect(getByTestId('table.screen')).toBeTruthy();
+    });
 });

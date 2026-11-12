@@ -15,6 +15,7 @@ export type MarkdownTableCellProps = {
 
 export const CELL_MIN_WIDTH = 96;
 export const CELL_MAX_WIDTH = 192;
+export const CELL_FULL_WIDTH = 384;
 
 const getStyleSheet = makeStyleSheetFromTheme((theme) => {
     return {
